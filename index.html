@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FocusFlow – Smart Productivity</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="loginScreen" class="fullscreen">
+    <div class="login-box">
+      <h2>Welcome to FocusFlow</h2>
+      <button id="googleSignIn">Sign in with Google</button>
+    </div>
+  </div>
+
+  <!-- App Screen -->
+  <div id="appScreen" class="hidden">
+    <button id="signOutBtn" class="sign-out">Sign Out</button>
+    <div class="app-container">
+      <h1>🧠 FocusFlow</h1>
+
+      <!-- Task Input -->
+      <section>
+        <h2>📝 Add Task</h2>
+        <input id="taskInput" type="text" placeholder="Task name" />
+        <input id="taskDeadline" type="datetime-local" />
+        <input id="taskDuration" type="number" placeholder="Duration (mins)" />
+        <select id="taskPriority">
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+        <button id="addTaskBtn">Add Task</button>
+        <ul id="taskList"></ul>
+      </section>
+
+      <!-- Focus & Stopwatch -->
+      <section>
+        <h2>⏱ Active Task</h2>
+        <div id="activeTaskInfo">No task running</div>
+        <button id="startFocusBtn" disabled>Mark Complete</button>
+        <div id="stopwatchDisplay">00:00</div>
+      </section>
+
+      <!-- Routine Reminders -->
+      <section>
+        <h2>🔔 Routine Reminders</h2>
+        <label><input type="checkbox" id="remWater" /> Water every hour</label>
+        <label><input type="checkbox" id="remGym" /> Gym at 6:00 PM</label>
+        <label><input type="checkbox" id="remSleep" /> Sleep at 10:00 PM</label>
+      </section>
+
+      <!-- Statistics -->
+      <section>
+        <h2>📊 Statistics</h2>
+        <canvas id="statsChart" width="400" height="200"></canvas>
+        <div id="streakDisplay">🔥 Streak: 0 days</div>
+      </section>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,107 +1,224 @@
-body, .fullscreen {
+/* === General Reset === */
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  background: #000;
+  color: white;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* === Background Animation === */
+.background {
+  position: fixed;
   width: 100%;
   height: 100%;
+  background: linear-gradient(130deg, #1a1a1a, #000);
+  z-index: -2;
 }
-.fullscreen {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #141e30, #243b55);
-}
-.hidden { display: none; }
 
-.login-box {
-  background: rgba(255,255,255,0.1);
-  padding: 2rem;
-  border-radius: 1rem;
+.background::before,
+.background::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(0, 204, 255, 0.3), transparent 70%),
+              radial-gradient(circle at center, rgba(255, 0, 204, 0.3), transparent 70%);
+  animation: float 15s linear infinite;
+  z-index: -1;
+}
+
+.background::after {
+  animation-delay: 5s;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* === Container Styles === */
+.todo-container,
+.login-container {
+  max-width: 500px;
+  margin: 60px auto;
+  padding: 30px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
   text-align: center;
 }
-#googleSignIn {
-  background: #db4437;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: transform .2s;
-}
-#googleSignIn:hover { transform: scale(1.05); }
 
-.app-container {
-  max-width: 800px;
-  margin: auto;
-  backdrop-filter: blur(10px);
-  background: rgba(255,255,255,0.05);
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 0 20px rgba(0,0,0,0.6);
-  color: #fff;
-  position: relative;
+/* === Title & Subtitle === */
+.title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 10px;
+  text-shadow: 0 0 10px #00f0ff;
 }
-.sign-out {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: #FF5722;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 12px;
-  cursor: pointer;
-  color: #fff;
-}
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  background: linear-gradient(to right, #00c6ff, #0072ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-section { margin: 30px 0; }
 
-input, select {
-  margin: 5px;
-  padding: 8px;
-  border: none;
-  border-radius: 6px;
-  width: 150px;
+.subtitle {
+  font-size: 1rem;
+  color: #ccc;
+  margin-bottom: 20px;
 }
-button {
-  margin: 5px;
-  padding: 10px 15px;
-  border: none;
-  background: #00c6ff;
-  border-radius: 6px;
-  color: #fff;
-  cursor: pointer;
-  transition: .3s;
+
+/* === Input Group === */
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
-button:hover {
-  background: #0072ff;
-  transform: scale(1.05);
-  box-shadow: 0 0 10px #00c6ff;
-}
-ul {
-  list-style: none;
-  padding: 0;
-}
-li {
-  background: rgba(255,255,255,0.1);
-  margin: 5px;
-  border-radius: 6px;
+
+.input-group input,
+.input-group select {
   padding: 10px;
+  border-radius: 10px;
+  border: none;
+  flex: 1;
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.input-group button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #00f0ff;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.input-group button:hover {
+  background: #00c9ff;
+}
+
+/* === Task List === */
+.task-list {
+  list-style: none;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.task-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  color: white;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
 }
-#stopwatchDisplay {
-  font-size: 2rem;
-  margin: 10px 0;
-  animation: pulse 1s infinite alternate;
+
+.priority-tag {
+  font-size: 0.85em;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 8px;
 }
-@keyframes pulse {
-  from { opacity: 0.6 }
-  to   { opacity: 1 }
+
+.priority-tag.High {
+  background-color: #ff4d4d;
+}
+.priority-tag.Medium {
+  background-color: #ffaa00;
+}
+.priority-tag.Low {
+  background-color: #3dc0ff;
+}
+
+/* === Edit Mode (tasks.html) === */
+.edit-input {
+  flex: 2;
+  margin-right: 6px;
+  padding: 6px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  outline: none;
+}
+
+.edit-priority {
+  padding: 6px;
+  margin-right: 6px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.save-btn, .delete-btn {
+  background: #00c9ff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 5px;
+  transition: 0.3s;
+}
+
+.delete-btn {
+  background: #ff4d4d;
+}
+
+/* === Google Button & Nav Links === */
+.google-btn {
+  padding: 12px 20px;
+  border: none;
+  background: #4285F4;
+  color: white;
+  font-weight: bold;
+  font-size: 1em;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.google-btn:hover {
+  background: #3367D6;
+}
+
+.nav-links {
+  margin-top: 20px;
+}
+
+.nav-links a {
+  color: #00e0ff;
+  margin: 0 12px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.nav-links a:hover {
+  color: #ffffff;
+}
+
+/* === Chart.js Canvas Styling === */
+canvas {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 20px;
+  margin-top: 10px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
 }

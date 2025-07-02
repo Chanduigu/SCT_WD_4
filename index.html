@@ -1,68 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FocusFlow – Smart Productivity</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FocusFlow</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Login Screen -->
-  <div id="loginScreen" class="fullscreen">
-    <div class="login-box">
-      <h2>Welcome to FocusFlow</h2>
-      <button id="googleSignIn">Sign in with Google</button>
-    </div>
+  <div class="background"></div>
+
+  <!-- Login Section -->
+  <div class="login-container" id="loginSection" style="display: none;">
+    <h1 class="title">Welcome to FocusFlow</h1>
+    <p class="subtitle">Stay productive. Stay focused.</p>
+    <button id="loginBtn" class="google-btn">Sign in with Google</button>
   </div>
 
-  <!-- App Screen -->
-  <div id="appScreen" class="hidden">
-    <button id="signOutBtn" class="sign-out">Sign Out</button>
-    <div class="app-container">
-      <h1>🧠 FocusFlow</h1>
+  <!-- Task Dashboard Section -->
+  <div class="todo-container" id="dashboardSection" style="display: none;">
+    <h1 class="title">To-Do</h1>
 
-      <!-- Task Input -->
-      <section>
-        <h2>📝 Add Task</h2>
-        <input id="taskInput" type="text" placeholder="Task name" />
-        <input id="taskDeadline" type="datetime-local" />
-        <input id="taskDuration" type="number" placeholder="Duration (mins)" />
-        <select id="taskPriority">
-          <option value="High">High</option>
-          <option value="Medium">Medium</option>
-          <option value="Low">Low</option>
-        </select>
-        <button id="addTaskBtn">Add Task</button>
-        <ul id="taskList"></ul>
-      </section>
-
-      <!-- Focus & Stopwatch -->
-      <section>
-        <h2>⏱ Active Task</h2>
-        <div id="activeTaskInfo">No task running</div>
-        <button id="startFocusBtn" disabled>Mark Complete</button>
-        <div id="stopwatchDisplay">00:00</div>
-      </section>
-
-      <!-- Routine Reminders -->
-      <section>
-        <h2>🔔 Routine Reminders</h2>
-        <label><input type="checkbox" id="remWater" /> Water every hour</label>
-        <label><input type="checkbox" id="remGym" /> Gym at 6:00 PM</label>
-        <label><input type="checkbox" id="remSleep" /> Sleep at 10:00 PM</label>
-      </section>
-
-      <!-- Statistics -->
-      <section>
-        <h2>📊 Statistics</h2>
-        <canvas id="statsChart" width="400" height="200"></canvas>
-        <div id="streakDisplay">🔥 Streak: 0 days</div>
-      </section>
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="Add a new task"/>
+      <select id="prioritySelect">
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+      <button onclick="addTask()">ADD</button>
     </div>
+
+    <ul id="taskList" class="task-list">
+      <!-- Tasks appear here -->
+    </ul>
+
+    <div class="nav-links">
+      <a href="tasks.html">View Tasks</a>
+      <a href="stats.html">View Stats</a>
+    </div>
+
+    <button id="logoutBtn" class="google-btn" style="margin-top: 20px;">Logout</button>
   </div>
 
-  <script src="script.js"></script>
+  <!-- Firebase + Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
+      authDomain: "to-do-c2c21.firebaseapp.com",
+      databaseURL: "https://to-do-c2c21-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "to-do-c2c21",
+      storageBucket: "to-do-c2c21.firebaseapp.com",
+      messagingSenderId: "948561635865",
+      appId: "1:948561635865:web:d563fda0f4c297212d5888"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    const loginSection = document.getElementById("loginSection");
+    const dashboardSection = document.getElementById("dashboardSection");
+
+    const taskInput = document.getElementById("taskInput");
+    const prioritySelect = document.getElementById("prioritySelect");
+    const taskList = document.getElementById("taskList");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loginBtn = document.getElementById("loginBtn");
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        loginSection.style.display = "none";
+        dashboardSection.style.display = "block";
+        loadTasks();
+      } else {
+        loginSection.style.display = "block";
+        dashboardSection.style.display = "none";
+      }
+    });
+
+    // Sign in
+    loginBtn.addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          currentUser = result.user;
+        })
+        .catch((error) => {
+          alert("Login failed: " + error.message);
+        });
+    });
+
+    // Sign out
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth);
+    });
+
+    // Add task
+    window.addTask = function () {
+      const text = taskInput.value.trim();
+      const priority = prioritySelect.value;
+
+      if (text === "" || !currentUser) return;
+
+      const task = {
+        text,
+        priority,
+        timestamp: Date.now()
+      };
+
+      const taskRef = ref(db, "tasks/" + currentUser.uid);
+      push(taskRef, task);
+      taskInput.value = "";
+    };
+
+    // Load tasks
+    function loadTasks() {
+      const taskRef = ref(db, "tasks/" + currentUser.uid);
+      onValue(taskRef, (snapshot) => {
+        taskList.innerHTML = "";
+        snapshot.forEach((child) => {
+          const task = child.val();
+          const li = document.createElement("li");
+          li.className = "task-item";
+          li.innerHTML = `
+            <span>${task.text}</span>
+            <span class="priority-tag ${task.priority}">${task.priority}</span>
+          `;
+          taskList.appendChild(li);
+        });
+      });
+    }
+  </script>
 </body>
 </html>

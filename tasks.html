@@ -2,32 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FocusFlow - Stats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FocusFlow - Tasks</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="background"></div>
 
   <div class="todo-container">
-    <h1 class="title">Your Stats</h1>
-    <canvas id="tasksChart" width="400" height="200"></canvas>
-    <canvas id="timeChart" width="400" height="200"></canvas>
-    <p class="streak" id="streakText">Streak: 0 days</p>
+    <h1 class="title">Your Tasks</h1>
+    <ul id="taskList" class="task-list"></ul>
 
     <div class="nav-links">
-      <a href="index.html">Dashboard</a>
-      <a href="tasks.html">View Tasks</a>
-      <a href="schedule.html">Schedule</a>
+      <a href="index.html">Back to Dashboard</a>
+      <a href="stats.html">View Stats</a>
     </div>
   </div>
 
   <script type="module">
+    // Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
       authDomain: "to-do-c2c21.firebaseapp.com",
@@ -38,77 +36,78 @@
       appId: "1:948561635865:web:d563fda0f4c297212d5888"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
+    const taskList = document.getElementById("taskList");
 
-    const tasksChart = document.getElementById("tasksChart").getContext("2d");
-    const timeChart = document.getElementById("timeChart").getContext("2d");
-    const streakText = document.getElementById("streakText");
+    let currentUser = null;
 
+    // Check auth
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const taskRef = ref(db, "tasks/" + user.uid);
-        onValue(taskRef, (snapshot) => {
-          const completedTasksByDate = {};
-          const timeSpentByDate = {};
-
-          snapshot.forEach((child) => {
-            const task = child.val();
-            if (task.completed) {
-              const date = new Date(task.timestamp).toLocaleDateString();
-              completedTasksByDate[date] = (completedTasksByDate[date] || 0) + 1;
-              timeSpentByDate[date] = (timeSpentByDate[date] || 0) + (task.timeRequired || 0);
-            }
-          });
-
-          const dates = Object.keys(completedTasksByDate);
-          const taskCounts = Object.values(completedTasksByDate);
-          const timeCounts = Object.values(timeSpentByDate);
-
-          new Chart(tasksChart, {
-            type: "bar",
-            data: {
-              labels: dates,
-              datasets: [{
-                label: "Completed Tasks",
-                data: taskCounts,
-                backgroundColor: "rgba(54, 162, 235, 0.6)",
-              }]
-            }
-          });
-
-          new Chart(timeChart, {
-            type: "line",
-            data: {
-              labels: dates,
-              datasets: [{
-                label: "Time Spent (mins)",
-                data: timeCounts,
-                backgroundColor: "rgba(255, 99, 132, 0.5)",
-                borderColor: "rgba(255, 99, 132, 1)",
-                fill: true
-              }]
-            }
-          });
-
-          // Calculate streak
-          const uniqueDates = new Set(dates.map(d => new Date(d).toDateString()));
-          const sorted = [...uniqueDates].map(d => new Date(d)).sort((a, b) => a - b);
-          let streak = 0;
-          for (let i = sorted.length - 1; i >= 0; i--) {
-            const today = new Date();
-            const day = new Date(today.setDate(today.getDate() - streak));
-            if (sorted[i].toDateString() === day.toDateString()) {
-              streak++;
-            } else {
-              break;
-            }
-          }
-          streakText.innerText = `Streak: ${streak} day(s)`;
-        });
+      if (!user) {
+        window.location.href = "index.html";
+      } else {
+        currentUser = user;
+        loadTasks();
       }
     });
+
+    // Load and display tasks
+    function loadTasks() {
+      const taskRef = ref(db, "tasks/" + currentUser.uid);
+      onValue(taskRef, (snapshot) => {
+        taskList.innerHTML = "";
+        snapshot.forEach((child) => {
+          const task = child.val();
+          const key = child.key;
+
+          const li = document.createElement("li");
+          li.className = "task-item";
+          li.innerHTML = `
+            <input type="checkbox" ${task.completed ? "checked" : ""} class="complete-checkbox" />
+            <input type="text" value="${task.text}" class="edit-input"/>
+            <select class="edit-priority">
+              <option value="High" ${task.priority === "High" ? "selected" : ""}>High</option>
+              <option value="Medium" ${task.priority === "Medium" ? "selected" : ""}>Medium</option>
+              <option value="Low" ${task.priority === "Low" ? "selected" : ""}>Low</option>
+            </select>
+            <button class="save-btn">Save</button>
+            <button class="delete-btn">Delete</button>
+          `;
+
+          // Save changes
+          li.querySelector(".save-btn").addEventListener("click", () => {
+            const newText = li.querySelector(".edit-input").value.trim();
+            const newPriority = li.querySelector(".edit-priority").value;
+            const completed = li.querySelector(".complete-checkbox").checked;
+
+            if (newText !== "") {
+              update(ref(db, `tasks/${currentUser.uid}/${key}`), {
+                text: newText,
+                priority: newPriority,
+                completed
+              });
+            }
+          });
+
+          // Delete task
+          li.querySelector(".delete-btn").addEventListener("click", () => {
+            remove(ref(db, `tasks/${currentUser.uid}/${key}`));
+          });
+
+          // Toggle completed immediately on checkbox click
+          li.querySelector(".complete-checkbox").addEventListener("change", (e) => {
+            update(ref(db, `tasks/${currentUser.uid}/${key}`), {
+              completed: e.target.checked
+            });
+          });
+
+          taskList.appendChild(li);
+        });
+      });
+    }
   </script>
 </body>
 </html>

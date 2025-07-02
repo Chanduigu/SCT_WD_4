@@ -80,6 +80,7 @@ body {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .input-group input,
@@ -127,6 +128,12 @@ body {
   box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
 }
 
+.task-item span {
+  flex: 1;
+  display: block;
+}
+
+/* === Priority Tags === */
 .priority-tag {
   font-size: 0.85em;
   font-weight: bold;
@@ -181,6 +188,21 @@ body {
   background: #ff4d4d;
 }
 
+.task-item button {
+  background: #ff4d4d;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.task-item button:hover {
+  background: #ff3333;
+}
+
 /* === Google Button & Nav Links === */
 .google-btn {
   padding: 12px 20px;
@@ -221,4 +243,13 @@ canvas {
   padding: 20px;
   margin-top: 10px;
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+/* === Streak Text === */
+.streak {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  color: #00ffff;
+  text-shadow: 0 0 8px #00ffff;
+  font-weight: bold;
 }

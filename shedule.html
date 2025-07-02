@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusFlow - Schedule</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background"></div>
+  <div class="todo-container">
+    <h1 class="title">Your Daily Schedule</h1>
+
+    <div class="input-group">
+      <input type="text" id="activityInput" placeholder="Activity (e.g., Gym, Study)" />
+      <input type="time" id="startTime" />
+      <input type="time" id="endTime" />
+      <button onclick="addScheduleItem()">Add</button>
+    </div>
+
+    <ul id="scheduleList" class="task-list"></ul>
+
+    <div class="nav-links">
+      <a href="index.html">Dashboard</a>
+      <a href="tasks.html">View Tasks</a>
+      <a href="stats.html">View Stats</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
+      authDomain: "to-do-c2c21.firebaseapp.com",
+      databaseURL: "https://to-do-c2c21-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "to-do-c2c21",
+      storageBucket: "to-do-c2c21.appspot.com",
+      messagingSenderId: "948561635865",
+      appId: "1:948561635865:web:d563fda0f4c297212d5888"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const scheduleList = document.getElementById("scheduleList");
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        loadSchedule();
+      }
+    });
+
+    window.addScheduleItem = function () {
+      const activity = document.getElementById("activityInput").value.trim();
+      const start = document.getElementById("startTime").value;
+      const end = document.getElementById("endTime").value;
+
+      if (!activity || !start || !end || !currentUser) return;
+
+      const item = { activity, start, end, timestamp: Date.now() };
+      push(ref(db, "schedule/" + currentUser.uid), item);
+
+      document.getElementById("activityInput").value = "";
+      document.getElementById("startTime").value = "";
+      document.getElementById("endTime").value = "";
+    };
+
+    function loadSchedule() {
+      const scheduleRef = ref(db, "schedule/" + currentUser.uid);
+      onValue(scheduleRef, (snapshot) => {
+        scheduleList.innerHTML = "";
+        snapshot.forEach((child) => {
+          const item = child.val();
+          const key = child.key;
+
+          const li = document.createElement("li");
+          li.className = "task-item";
+          li.innerHTML = `
+            <span><strong>${item.activity}</strong><br>${item.start} - ${item.end}</span>
+            <button onclick="removeSchedule('${key}')">Remove</button>
+          `;
+          scheduleList.appendChild(li);
+        });
+      });
+    }
+
+    window.removeSchedule = function (key) {
+      const refPath = ref(db, "schedule/" + currentUser.uid + "/" + key);
+      remove(refPath);
+    };
+  </script>
+</body>
+</html>

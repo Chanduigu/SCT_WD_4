@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FocusFlow - Stats</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,19 +11,19 @@
   <div class="background"></div>
 
   <div class="todo-container">
-    <h1 class="title">Productivity Stats</h1>
-
-    <canvas id="priorityChart" style="margin-bottom: 30px;"></canvas>
-    <canvas id="dailyChart"></canvas>
+    <h1 class="title">Your Stats</h1>
+    <canvas id="tasksChart" width="400" height="200"></canvas>
+    <canvas id="timeChart" width="400" height="200"></canvas>
+    <p class="streak" id="streakText">Streak: 0 days</p>
 
     <div class="nav-links">
       <a href="index.html">Dashboard</a>
       <a href="tasks.html">View Tasks</a>
+      <a href="schedule.html">Schedule</a>
     </div>
   </div>
 
   <script type="module">
-    // Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -33,7 +33,7 @@
       authDomain: "to-do-c2c21.firebaseapp.com",
       databaseURL: "https://to-do-c2c21-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "to-do-c2c21",
-      storageBucket: "to-do-c2c21.firebaseapp.com",
+      storageBucket: "to-do-c2c21.appspot.com",
       messagingSenderId: "948561635865",
       appId: "1:948561635865:web:d563fda0f4c297212d5888"
     };
@@ -42,112 +42,73 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const priorityCounts = { High: 0, Medium: 0, Low: 0 };
-    const dailyCounts = {};
-
-    let currentUser = null;
+    const tasksChart = document.getElementById("tasksChart").getContext("2d");
+    const timeChart = document.getElementById("timeChart").getContext("2d");
+    const streakText = document.getElementById("streakText");
 
     onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        currentUser = user;
-        loadStats();
+      if (user) {
+        const taskRef = ref(db, "tasks/" + user.uid);
+        onValue(taskRef, (snapshot) => {
+          const completedTasksByDate = {};
+          const timeSpentByDate = {};
+
+          snapshot.forEach((child) => {
+            const task = child.val();
+            if (task.completed) {
+              const date = new Date(task.timestamp).toLocaleDateString();
+              completedTasksByDate[date] = (completedTasksByDate[date] || 0) + 1;
+              timeSpentByDate[date] = (timeSpentByDate[date] || 0) + (task.timeRequired || 0);
+            }
+          });
+
+          const dates = Object.keys(completedTasksByDate);
+          const taskCounts = Object.values(completedTasksByDate);
+          const timeCounts = Object.values(timeSpentByDate);
+
+          new Chart(tasksChart, {
+            type: "bar",
+            data: {
+              labels: dates,
+              datasets: [{
+                label: "Completed Tasks",
+                data: taskCounts,
+                backgroundColor: "rgba(54, 162, 235, 0.6)",
+              }]
+            }
+          });
+
+          new Chart(timeChart, {
+            type: "line",
+            data: {
+              labels: dates,
+              datasets: [{
+                label: "Time Spent (mins)",
+                data: timeCounts,
+                backgroundColor: "rgba(255, 99, 132, 0.5)",
+                borderColor: "rgba(255, 99, 132, 1)",
+                fill: true
+              }]
+            }
+          });
+
+          // Calculate streak
+          const uniqueDates = new Set(dates.map(d => new Date(d).toDateString()));
+          const sorted = [...uniqueDates].map(d => new Date(d)).sort((a, b) => a - b);
+          let streak = 0;
+          for (let i = sorted.length - 1; i >= 0; i--) {
+            const today = new Date();
+            const day = new Date(today.setDate(today.getDate() - streak));
+            if (sorted[i].toDateString() === day.toDateString()) {
+              streak++;
+            } else {
+              break;
+            }
+          }
+          streakText.innerText = `Streak: ${streak} day(s)`;
+        });
       }
     });
-
-    function loadStats() {
-      const userRef = ref(db, "tasks/" + currentUser.uid);
-      onValue(userRef, (snapshot) => {
-        priorityCounts.High = 0;
-        priorityCounts.Medium = 0;
-        priorityCounts.Low = 0;
-        dailyCounts = {};
-
-        const today = new Date();
-        const days = [];
-
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date();
-          d.setDate(today.getDate() - i);
-          const key = d.toISOString().split("T")[0];
-          dailyCounts[key] = 0;
-          days.push(key);
-        }
-
-        snapshot.forEach((child) => {
-          const task = child.val();
-          priorityCounts[task.priority]++;
-
-          const date = new Date(task.timestamp).toISOString().split("T")[0];
-          if (dailyCounts[date] !== undefined) {
-            dailyCounts[date]++;
-          }
-        });
-
-        renderCharts(days);
-      });
-    }
-
-    function renderCharts(days) {
-      // Priority Pie Chart
-      new Chart(document.getElementById("priorityChart"), {
-        type: "pie",
-        data: {
-          labels: ["High", "Medium", "Low"],
-          datasets: [{
-            data: [
-              priorityCounts.High,
-              priorityCounts.Medium,
-              priorityCounts.Low
-            ],
-            backgroundColor: ["#ff4d4d", "#ffaa00", "#3dc0ff"],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          plugins: {
-            title: {
-              display: true,
-              text: "Task Priority Distribution",
-              color: "#fff",
-              padding: 20,
-              font: { size: 18 }
-            },
-            legend: { labels: { color: "#fff" } }
-          }
-        }
-      });
-
-      // Daily Task Bar Chart
-      new Chart(document.getElementById("dailyChart"), {
-        type: "bar",
-        data: {
-          labels: days,
-          datasets: [{
-            label: "Tasks",
-            data: days.map(d => dailyCounts[d] || 0),
-            backgroundColor: "#00c9ff"
-          }]
-        },
-        options: {
-          scales: {
-            x: { ticks: { color: "#fff" } },
-            y: { ticks: { color: "#fff" } }
-          },
-          plugins: {
-            title: {
-              display: true,
-              text: "Tasks Added (Last 7 Days)",
-              color: "#fff",
-              padding: 20,
-              font: { size: 18 }
-            },
-            legend: { labels: { color: "#fff" } }
-          }
-        }
-      });
-    }
   </script>
 </body>
 </html>

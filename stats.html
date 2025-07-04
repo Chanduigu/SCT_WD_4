@@ -92,7 +92,6 @@
             }
           });
 
-          // Calculate streak
           const uniqueDates = new Set(dates.map(d => new Date(d).toDateString()));
           const sorted = [...uniqueDates].map(d => new Date(d)).sort((a, b) => a - b);
           let streak = 0;

@@ -253,6 +253,7 @@ canvas {
   text-shadow: 0 0 8px #00ffff;
   font-weight: bold;
 }
+
 /* === Schedule Section === */
 .schedule {
   display: grid;
@@ -306,4 +307,3 @@ canvas {
     grid-template-columns: 1fr;
   }
 }
-

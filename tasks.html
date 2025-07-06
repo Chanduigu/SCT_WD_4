@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FocusFlow - Stats</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial‑scale=1.0">
+  <title>Tasks – Dharana</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="background"></div>
 
   <div class="todo-container">
-    <h1 class="title">Your Stats</h1>
-    <canvas id="tasksChart" width="400" height="200"></canvas>
-    <canvas id="timeChart" width="400" height="200"></canvas>
-    <p class="streak" id="streakText">Streak: 0 days</p>
+    <h1 class="title">Your Tasks</h1>
+    <ul id="taskList" class="task-list"></ul>
 
     <div class="nav-links">
-      <a href="index.html">Dashboard</a>
-      <a href="tasks.html">View Tasks</a>
+      <a href="dashboard.html">Home</a>
+      <a href="progress.html">My Progress</a>
       <a href="schedule.html">Schedule</a>
     </div>
   </div>
@@ -26,89 +23,57 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
-      authDomain: "to-do-c2c21.firebaseapp.com",
-      databaseURL: "https://to-do-c2c21-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "to-do-c2c21",
-      storageBucket: "to-do-c2c21.appspot.com",
-      messagingSenderId: "948561635865",
-      appId: "1:948561635865:web:d563fda0f4c297212d5888"
-    };
-
+    const firebaseConfig = { /* same config */ };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const tasksChart = document.getElementById("tasksChart").getContext("2d");
-    const timeChart = document.getElementById("timeChart").getContext("2d");
-    const streakText = document.getElementById("streakText");
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const taskRef = ref(db, "tasks/" + user.uid);
-        onValue(taskRef, (snapshot) => {
-          const completedTasksByDate = {};
-          const timeSpentByDate = {};
-
-          snapshot.forEach((child) => {
-            const task = child.val();
-            if (task.completed) {
-              const date = new Date(task.timestamp).toLocaleDateString();
-              completedTasksByDate[date] = (completedTasksByDate[date] || 0) + 1;
-              timeSpentByDate[date] = (timeSpentByDate[date] || 0) + (task.timeRequired || 0);
-            }
-          });
-
-          const dates = Object.keys(completedTasksByDate);
-          const taskCounts = Object.values(completedTasksByDate);
-          const timeCounts = Object.values(timeSpentByDate);
-
-          new Chart(tasksChart, {
-            type: "bar",
-            data: {
-              labels: dates,
-              datasets: [{
-                label: "Completed Tasks",
-                data: taskCounts,
-                backgroundColor: "rgba(54, 162, 235, 0.6)",
-              }]
-            }
-          });
-
-          new Chart(timeChart, {
-            type: "line",
-            data: {
-              labels: dates,
-              datasets: [{
-                label: "Time Spent (mins)",
-                data: timeCounts,
-                backgroundColor: "rgba(255, 99, 132, 0.5)",
-                borderColor: "rgba(255, 99, 132, 1)",
-                fill: true
-              }]
-            }
-          });
-
-          // Calculate streak
-          const uniqueDates = new Set(dates.map(d => new Date(d).toDateString()));
-          const sorted = [...uniqueDates].map(d => new Date(d)).sort((a, b) => a - b);
-          let streak = 0;
-          for (let i = sorted.length - 1; i >= 0; i--) {
-            const today = new Date();
-            const day = new Date(today.setDate(today.getDate() - streak));
-            if (sorted[i].toDateString() === day.toDateString()) {
-              streak++;
-            } else {
-              break;
-            }
-          }
-          streakText.innerText = `Streak: ${streak} day(s)`;
-        });
-      }
+    let user;
+    onAuthStateChanged(auth, u => {
+      if (!u) return location.href = "landing.html";
+      user = u; loadTasks();
     });
+
+    window.loadTasks = () => {
+      const listEl = document.getElementById("taskList");
+      onValue(ref(db, `tasks/${user.uid}`), snap => {
+        listEl.innerHTML = '';
+        snap.forEach(c => {
+          const t = c.val(), k = c.key;
+          const li = document.createElement('li');
+          li.className = "task-item";
+          li.innerHTML = `
+            <input type="checkbox" ${t.completed?'checked':''} class="complete-checkbox"/>
+            <input type="text" value="${t.text}" class="edit-input"/>
+            <select class="edit-priority">
+              <option value="High" ${t.priority==='High'?'selected':''}>High</option>
+              <option value="Medium" ${t.priority==='Medium'?'selected':''}>Medium</option>
+              <option value="Low" ${t.priority==='Low'?'selected':''}>Low</option>
+            </select>
+            <button class="save-btn">Save</button>
+            <button class="delete-btn">Delete</button>
+          `;
+
+          li.querySelector('.complete-checkbox').onchange = e => {
+            update(ref(db, `tasks/${user.uid}/${k}`), { completed: e.target.checked });
+          };
+
+          li.querySelector('.save-btn').onclick = () => {
+            const text = li.querySelector('.edit-input').value.trim();
+            const p = li.querySelector('.edit-priority').value;
+            if (text) update(ref(db, `tasks/${user.uid}/${k}`), { text, priority: p });
+          };
+
+          li.querySelector('.delete-btn').onclick = () => {
+            remove(ref(db, `tasks/${user.uid}/${k}`));
+          };
+
+          listEl.appendChild(li);
+        });
+      });
+    };
   </script>
 </body>
 </html>

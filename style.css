@@ -1,14 +1,13 @@
-/* === General Reset === */
+/* === General Reset & Body === */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Segoe UI', sans-serif;
 }
-
 body {
   background: #000;
-  color: white;
+  color: #fff;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -21,116 +20,142 @@ body {
   background: linear-gradient(130deg, #1a1a1a, #000);
   z-index: -2;
 }
-
 .background::before,
 .background::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at center, rgba(0, 204, 255, 0.3), transparent 70%),
-              radial-gradient(circle at center, rgba(255, 0, 204, 0.3), transparent 70%);
+  background: radial-gradient(circle at center, rgba(0,204,255,0.3), transparent 70%), radial-gradient(circle at center, rgba(255,0,204,0.3), transparent 70%);
   animation: float 15s linear infinite;
   z-index: -1;
 }
-
-.background::after {
-  animation-delay: 5s;
-}
-
+.background::after { animation-delay: 5s; }
 @keyframes float {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* === Container Styles === */
-.todo-container,
-.login-container {
+/* === Container Styles (cards, modals) === */
+.container, .todo-container, .profile-container, .settings-container, .login-container {
   max-width: 500px;
   margin: 60px auto;
   padding: 30px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255,255,255,0.05);
   backdrop-filter: blur(15px);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0,255,255,0.1);
   text-align: center;
 }
 
-/* === Title & Subtitle === */
+/* === Titles & Subtitles === */
 .title {
   font-size: 2.2rem;
   font-weight: bold;
-  color: #ffffff;
+  color: #fff;
   margin-bottom: 10px;
   text-shadow: 0 0 10px #00f0ff;
 }
-
 .subtitle {
   font-size: 1rem;
   color: #ccc;
   margin-bottom: 20px;
 }
 
-/* === Input Group === */
+/* === Navbar Links === */
+.nav-links, .profile-nav {
+  margin-top: 20px;
+}
+.nav-links a, .profile-nav a {
+  color: #00e0ff;
+  margin: 0 12px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.nav-links a:hover, .profile-nav a:hover {
+  color: #fff;
+}
+
+/* === Buttons (Google, Save/Delete) === */
+.google-btn, .save-btn, .delete-btn, .btn {
+  padding: 12px 20px;
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.google-btn { background: #4285F4; }
+.google-btn:hover { background: #3367D6; }
+.save-btn { background: #00c9ff; }
+.save-btn:hover { background: #009bbf; }
+.delete-btn { background: #ff4d4d; }
+.delete-btn:hover { background: #e60000; }
+
+/* === Input Group Styling === */
 .input-group {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-
-.input-group input,
+.input-group input[type="text"],
+.input-group input[type="number"],
+.input-group input[type="time"],
+.input-group input[type="datetime-local"],
 .input-group select {
+  flex: 1;
   padding: 10px;
   border-radius: 10px;
   border: none;
-  flex: 1;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
   outline: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
 }
 
-.input-group button {
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  background: #00f0ff;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.input-group button:hover {
-  background: #00c9ff;
-}
-
-/* === Task List === */
+/* === Task/Schedule List Styling === */
 .task-list {
   list-style: none;
   margin-top: 10px;
   text-align: left;
 }
-
 .task-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255,255,255,0.08);
   padding: 10px 14px;
   border-radius: 12px;
   margin-bottom: 10px;
-  color: white;
-  box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 8px rgba(0,255,255,0.1);
 }
-
-.task-item span {
+.task-item span,
+.task-item div {
   flex: 1;
-  display: block;
+}
+.task-item input[type="text"] {
+  flex: 2;
+  margin-right: 10px;
+  padding: 6px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+.task-item select,
+.task-item input[type="number"],
+.task-item input[type="datetime-local"] {
+  padding: 6px;
+  margin-right: 6px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+.task-item input[type="checkbox"] {
+  margin-right: 10px;
 }
 
 /* === Priority Tags === */
@@ -140,116 +165,127 @@ body {
   padding: 5px 10px;
   border-radius: 8px;
 }
+.priority-tag.High { background-color: #ff4d4d; }
+.priority-tag.Medium { background-color: #ffaa00; }
+.priority-tag.Low { background-color: #3dc0ff; }
 
-.priority-tag.High {
-  background-color: #ff4d4d;
+/* === Schedule Blocks (on dashboard) === */
+.schedule {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+  gap: 16px;
+  margin-top: 30px;
+  padding: 10px;
 }
-.priority-tag.Medium {
-  background-color: #ffaa00;
+.schedule-block {
+  background: rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 15px rgba(0,255,255,0.15);
+  animation: glowPulse 6s ease-in-out infinite;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.priority-tag.Low {
-  background-color: #3dc0ff;
+.schedule-block:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(0,255,255,0.25);
 }
-
-/* === Edit Mode (tasks.html) === */
-.edit-input {
-  flex: 2;
-  margin-right: 6px;
-  padding: 6px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255,255,255,0.1);
-  color: white;
-  outline: none;
+.schedule-block h3 {
+  font-size: 1.2rem;
+  color: #00f0ff;
+  text-shadow: 0 0 5px #00f0ff;
 }
-
-.edit-priority {
-  padding: 6px;
-  margin-right: 6px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255,255,255,0.1);
-  color: white;
+.schedule-block p {
+  color: #fff;
+  opacity: 0.9;
 }
-
-.save-btn, .delete-btn {
-  background: #00c9ff;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 10px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  margin-left: 5px;
-  transition: 0.3s;
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 15px rgba(0,255,255,0.1); }
+  50% { box-shadow: 0 0 25px rgba(0,255,255,0.25); }
 }
 
-.delete-btn {
-  background: #ff4d4d;
-}
-
-.task-item button {
-  background: #ff4d4d;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 8px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.task-item button:hover {
-  background: #ff3333;
-}
-
-/* === Google Button & Nav Links === */
-.google-btn {
-  padding: 12px 20px;
-  border: none;
-  background: #4285F4;
-  color: white;
-  font-weight: bold;
-  font-size: 1em;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.google-btn:hover {
-  background: #3367D6;
-}
-
-.nav-links {
-  margin-top: 20px;
-}
-
-.nav-links a {
-  color: #00e0ff;
-  margin: 0 12px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: 0.3s;
-}
-
-.nav-links a:hover {
-  color: #ffffff;
-}
-
-/* === Chart.js Canvas Styling === */
+/* === Progress Charts & Streak Text === */
 canvas {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255,255,255,0.05);
   border-radius: 15px;
   padding: 20px;
   margin-top: 10px;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0,255,255,0.1);
 }
-
-/* === Streak Text === */
 .streak {
   margin-top: 20px;
   font-size: 1.2rem;
   color: #00ffff;
   text-shadow: 0 0 8px #00ffff;
   font-weight: bold;
+}
+
+/* === Profile Page Styles === */
+.profile-container .profile-info {
+  text-align: left;
+}
+.profile-container .profile-info p {
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.profile-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* === Settings Page Styles === */
+.settings-container form {
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+.settings-container label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+.settings-container input,
+.settings-container select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  outline: none;
+}
+.settings-container .form-section {
+  margin-bottom: 20px;
+}
+.settings-container .form-section h3 {
+  margin-bottom: 8px;
+  color: #00f0ff;
+}
+
+/* === Light/Dark Mode === */
+body.light-mode {
+  background: #f5f5f5;
+  color: #000;
+}
+body.light-mode .container,
+body.light-mode .todo-container,
+body.light-mode .profile-container,
+body.light-mode .settings-container {
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+body.light-mode .background { display: none; }
+body.light-mode .title,
+body.light-mode .subtitle {
+  color: #000;
+  text-shadow: none;
+}
+
+/* === Mobile Responsive === */
+@media (max-width: 600px) {
+  .schedule {
+    grid-template-columns: 1fr;
+  }
 }

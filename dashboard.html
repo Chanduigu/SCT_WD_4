@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dharana - Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">Dharana</div>
+    <div class="nav-items">
+      <a href="dashboard.html" class="active">Home</a>
+      <a href="profile.html">My Profile</a>
+      <a href="progress.html">My Progress</a>
+      <a href="settings.html">Settings</a>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="todo-container">
+    <h1 class="title">Welcome to Dharana</h1>
+    <p class="subtitle">Dharana is your focused productivity app designed to help you manage tasks, track progress, and build daily discipline with ease and elegance.</p>
+
+    <ul class="dashboard-features">
+      <li>📝 Manage tasks with priorities (High/Medium/Low)</li>
+      <li>📊 Track your productivity with insightful analytics</li>
+      <li>📅 Plan your daily routines and schedule</li>
+      <li>🔔 Get timely reminders for deadlines</li>
+      <li>🧘 Reflect your progress and stay consistent with streaks</li>
+    </ul>
+
+    <div class="nav-links">
+      <a href="tasks.html">Manage Tasks</a>
+      <a href="schedule.html">Daily Schedule</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
+      authDomain: "to-do-c2c21.firebaseapp.com",
+      databaseURL: "https://to-do-c2c21-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "to-do-c2c21",
+      storageBucket: "to-do-c2c21.appspot.com",
+      messagingSenderId: "948561635865",
+      appId: "1:948561635865:web:d563fda0f4c297212d5888"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "landing.html";
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth).then(() => {
+        window.location.href = "landing.html";
+      });
+    });
+  </script>
+</body>
+</html>

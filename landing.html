@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dharana - Welcome</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background"></div>
+  <div class="todo-container login-container">
+    <h1 class="title">Welcome to Dharana</h1>
+    <p class="subtitle">Your all-in-one glowing productivity companion 🌟</p>
+
+    <button id="loginBtn" class="google-btn">Login with Google</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
+      authDomain: "to-do-c2c21.firebaseapp.com",
+      databaseURL: "https://to-do-c2c21-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "to-do-c2c21",
+      storageBucket: "to-do-c2c21.appspot.com",
+      messagingSenderId: "948561635865",
+      appId: "1:948561635865:web:d563fda0f4c297212d5888"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const loginBtn = document.getElementById("loginBtn");
+
+    loginBtn.addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then(() => {
+          window.location.href = "dashboard.html";
+        })
+        .catch((error) => {
+          alert("Login failed: " + error.message);
+        });
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "dashboard.html";
+      }
+    });
+  </script>
+</body>
+</html>

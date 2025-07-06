@@ -1,98 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FocusFlow - Schedule</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial‑scale=1.0">
+  <title>Schedule – Dharana</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="background"></div>
   <div class="todo-container">
-    <h1 class="title">Your Daily Schedule</h1>
+    <h1 class="title">Daily Routine</h1>
 
     <div class="input-group">
-      <input type="text" id="activityInput" placeholder="Activity (e.g., Gym, Study)" />
-      <input type="time" id="startTime" />
-      <input type="time" id="endTime" />
-      <button onclick="addScheduleItem()">Add</button>
+      <input type="text" id="actInput" placeholder="Activity"/>
+      <input type="time" id="startInput">
+      <input type="time" id="endInput">
+      <select id="tagInput">
+        <option value="Work">Work</option>
+        <option value="Health">Health</option>
+        <option value="Sleep">Sleep</option>
+      </select>
+      <select id="recInput">
+        <option value="None">Once</option>
+        <option value="Daily">Every Day</option>
+        <option value="Mon">Monday</option>
+        <option value="Tue">Tuesday</option>
+        <!-- etc -->
+      </select>
+      <button onclick="addSchedule()">Add</button>
     </div>
 
-    <ul id="scheduleList" class="task-list"></ul>
+    <ul id="sList" class="task-list"></ul>
 
     <div class="nav-links">
-      <a href="index.html">Dashboard</a>
-      <a href="tasks.html">View Tasks</a>
-      <a href="stats.html">View Stats</a>
+      <a href="dashboard.html">Home</a>
+      <a href="tasks.html">Tasks</a>
+      <a href="progress.html">My Progress</a>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
-      authDomain: "to-do-c2c21.firebaseapp.com",
-      databaseURL: "https://to-do-c2c21-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "to-do-c2c21",
-      storageBucket: "to-do-c2c21.appspot.com",
-      messagingSenderId: "948561635865",
-      appId: "1:948561635865:web:d563fda0f4c297212d5888"
-    };
-
+    const firebaseConfig = { /* same config */ };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const scheduleList = document.getElementById("scheduleList");
-    let currentUser = null;
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        loadSchedule();
-      }
+    let user;
+    onAuthStateChanged(auth, u => {
+      if (!u) return location.href = "landing.html";
+      user = u; loadSchedule();
     });
 
-    window.addScheduleItem = function () {
-      const activity = document.getElementById("activityInput").value.trim();
-      const start = document.getElementById("startTime").value;
-      const end = document.getElementById("endTime").value;
-
-      if (!activity || !start || !end || !currentUser) return;
-
-      const item = { activity, start, end, timestamp: Date.now() };
-      push(ref(db, "schedule/" + currentUser.uid), item);
-
-      document.getElementById("activityInput").value = "";
-      document.getElementById("startTime").value = "";
-      document.getElementById("endTime").value = "";
+    window.addSchedule = () => {
+      const act = document.getElementById('actInput').value.trim();
+      const st = document.getElementById('startInput').value;
+      const et = document.getElementById('endInput').value;
+      const tag = document.getElementById('tagInput').value;
+      const rec = document.getElementById('recInput').value;
+      if (!act||!st||!et) return;
+      push(ref(db, `schedule/${user.uid}`), { act, st, et, tag, rec });
+      ['actInput','startInput','endInput'].forEach(i=>document.getElementById(i).value='');
     };
 
-    function loadSchedule() {
-      const scheduleRef = ref(db, "schedule/" + currentUser.uid);
-      onValue(scheduleRef, (snapshot) => {
-        scheduleList.innerHTML = "";
-        snapshot.forEach((child) => {
-          const item = child.val();
-          const key = child.key;
-
-          const li = document.createElement("li");
+    window.loadSchedule = () => {
+      const ul = document.getElementById('sList');
+      onValue(ref(db, `schedule/${user.uid}`), snap => {
+        ul.innerHTML = '';
+        snap.forEach(c => {
+          const i = c.val(); const k = c.key;
+          const li = document.createElement('li');
           li.className = "task-item";
           li.innerHTML = `
-            <span><strong>${item.activity}</strong><br>${item.start} - ${item.end}</span>
-            <button onclick="removeSchedule('${key}')">Remove</button>
+            <div style="flex:1">
+              <strong style="color:#${i.tag==='Work'?'ff9900':i.tag==='Health'?'33cc33':'66ccff'}">${i.act}</strong>
+              <p>${i.st} – ${i.et} <em>(${i.rec})</em></p>
+            </div>
+            <button class="delete-btn">Remove</button>
           `;
-          scheduleList.appendChild(li);
+          li.querySelector('.delete-btn').onclick = () => {
+            remove(ref(db, `schedule/${user.uid}/${k}`));
+          };
+          ul.appendChild(li);
         });
       });
-    }
-
-    window.removeSchedule = function (key) {
-      const refPath = ref(db, "schedule/" + currentUser.uid + "/" + key);
-      remove(refPath);
     };
   </script>
 </body>

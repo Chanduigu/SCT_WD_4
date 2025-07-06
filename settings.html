@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dharana - Tasks</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background"></div>
+
+  <div class="todo-container">
+    <h1 class="title">Your Task List</h1>
+    <ul id="taskList" class="task-list"></ul>
+
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="stats.html">Progress</a>
+      <a href="schedule.html">Schedule</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
+      authDomain: "to-do-c2c21.firebaseapp.com",
+      databaseURL: "https://to-do-c2c21-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "to-do-c2c21",
+      storageBucket: "to-do-c2c21.appspot.com",
+      messagingSenderId: "948561635865",
+      appId: "1:948561635865:web:d563fda0f4c297212d5888"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const taskList = document.getElementById("taskList");
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) return window.location.href = "dashboard.html";
+      const taskRef = ref(db, "tasks/" + user.uid);
+
+      onValue(taskRef, (snapshot) => {
+        taskList.innerHTML = "";
+        snapshot.forEach((child) => {
+          const task = child.val();
+          const key = child.key;
+
+          const li = document.createElement("li");
+          li.className = "task-item";
+
+          li.innerHTML = `
+            <input type="checkbox" class="complete-checkbox" ${task.completed ? "checked" : ""} />
+            <input type="text" class="edit-input" value="${task.text || ""}" />
+            <select class="edit-priority">
+              <option value="High" ${task.priority === "High" ? "selected" : ""}>High</option>
+              <option value="Medium" ${task.priority === "Medium" ? "selected" : ""}>Medium</option>
+              <option value="Low" ${task.priority === "Low" ? "selected" : ""}>Low</option>
+            </select>
+            <input type="number" class="edit-time" value="${task.timeRequired || ''}" placeholder="Time (mins)" />
+            <input type="datetime-local" class="edit-deadline" value="${task.deadline || ''}" />
+            <button class="save-btn">Save</button>
+            <button class="delete-btn">Delete</button>
+          `;
+
+          // Save task updates
+          li.querySelector(".save-btn").addEventListener("click", () => {
+            const newText = li.querySelector(".edit-input").value.trim();
+            const newPriority = li.querySelector(".edit-priority").value;
+            const newTime = parseInt(li.querySelector(".edit-time").value);
+            const newDeadline = li.querySelector(".edit-deadline").value;
+            const completed = li.querySelector(".complete-checkbox").checked;
+
+            if (newText !== "") {
+              update(ref(db, `tasks/${user.uid}/${key}`), {
+                text: newText,
+                priority: newPriority,
+                timeRequired: isNaN(newTime) ? 0 : newTime,
+                deadline: newDeadline,
+                completed
+              });
+            }
+          });
+
+          // Delete task
+          li.querySelector(".delete-btn").addEventListener("click", () => {
+            remove(ref(db, `tasks/${user.uid}/${key}`));
+          });
+
+          // Toggle complete
+          li.querySelector(".complete-checkbox").addEventListener("change", (e) => {
+            update(ref(db, `tasks/${user.uid}/${key}`), {
+              completed: e.target.checked
+            });
+          });
+
+          taskList.appendChild(li);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

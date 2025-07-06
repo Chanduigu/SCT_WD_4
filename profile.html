@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dharana - My Profile</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">Dharana</div>
+    <div class="nav-items">
+      <a href="dashboard.html">Home</a>
+      <a href="profile.html" class="active">My Profile</a>
+      <a href="progress.html">My Progress</a>
+      <a href="settings.html">Settings</a>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+  </nav>
+
+  <div class="todo-container">
+    <h1 class="title">My Profile</h1>
+    <div id="profileDetails" class="profile-details">
+      <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
+      <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+      <p><strong>Phone:</strong> <span id="profilePhone">Loading...</span></p>
+      <p><strong>Document Link:</strong> <a id="profileDoc" href="#" target="_blank">View Document</a></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
+      authDomain: "to-do-c2c21.firebaseapp.com",
+      databaseURL: "https://to-do-c2c21-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "to-do-c2c21",
+      storageBucket: "to-do-c2c21.appspot.com",
+      messagingSenderId: "948561635865",
+      appId: "1:948561635865:web:d563fda0f4c297212d5888"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "landing.html";
+        return;
+      }
+
+      const uid = user.uid;
+      const profileRef = ref(db, `profiles/${uid}`);
+      get(profileRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          document.getElementById("profileName").innerText = data.name || "N/A";
+          document.getElementById("profileEmail").innerText = data.email || user.email || "N/A";
+          document.getElementById("profilePhone").innerText = data.phone || "N/A";
+          document.getElementById("profileDoc").href = data.document || "#";
+          document.getElementById("profileDoc").innerText = data.document ? "View Document" : "Not Provided";
+        } else {
+          document.getElementById("profileDetails").innerHTML = "<p>No profile data found.</p>";
+        }
+      });
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth).then(() => {
+        window.location.href = "landing.html";
+      });
+    });
+  </script>
+</body>
+</html>

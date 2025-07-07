@@ -9,7 +9,7 @@
 <body>
   <div class="background"></div>
 
-  <!-- Top Navbar -->
+  <!-- Navbar -->
   <nav class="navbar">
     <div class="nav-brand">Dharana</div>
     <div class="nav-items">
@@ -23,13 +23,29 @@
 
   <div class="todo-container">
     <h1 class="title">Your Task List</h1>
+
+    <!-- Add Task Section -->
+    <div class="input-group">
+      <input type="text" id="newTaskText" placeholder="New Task" />
+      <select id="newTaskPriority">
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+      <input type="number" id="estTime" placeholder="Est. Time (mins)" />
+      <button id="startTimer">Start Timer</button>
+      <button id="addTaskBtn">Add Task</button>
+    </div>
+    <p id="timerDisplay">Time Spent: 0 mins</p>
+
+    <!-- Task List -->
     <ul id="taskList" class="task-list"></ul>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
@@ -44,13 +60,27 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
+
     const taskList = document.getElementById("taskList");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const addBtn = document.getElementById("addTaskBtn");
+    const startBtn = document.getElementById("startTimer");
+    const timerDisplay = document.getElementById("timerDisplay");
 
-    // Load tasks after authentication
-    onAuthStateChanged(auth, (user) => {
-      if (!user) return window.location.href = "landing.html";
+    let timer = null;
+    let timeSpent = 0;
+    let user;
+
+    // Auth state
+    onAuthStateChanged(auth, (u) => {
+      if (!u) return window.location.href = "landing.html";
+      user = u;
+      loadTasks();
+    });
+
+    // Load tasks
+    function loadTasks() {
       const taskRef = ref(db, `tasks/${user.uid}`);
-
       onValue(taskRef, (snapshot) => {
         taskList.innerHTML = "";
         snapshot.forEach((child) => {
@@ -59,7 +89,6 @@
 
           const li = document.createElement("li");
           li.className = "task-item";
-
           li.innerHTML = `
             <input type="checkbox" class="complete-checkbox" ${task.completed ? "checked" : ""} />
             <input type="text" class="edit-input" value="${task.text || ""}" />
@@ -88,12 +117,13 @@
                 priority: newPriority,
                 timeRequired: isNaN(newTime) ? 0 : newTime,
                 deadline: newDeadline,
-                completed: completed
+                completed: completed,
+                timestamp: completed ? Date.now() : null
               });
             }
           });
 
-          // Delete task
+          // Delete
           li.querySelector(".delete-btn").addEventListener("click", () => {
             remove(ref(db, `tasks/${user.uid}/${key}`));
           });
@@ -101,20 +131,56 @@
           // Toggle complete checkbox
           li.querySelector(".complete-checkbox").addEventListener("change", (e) => {
             update(ref(db, `tasks/${user.uid}/${key}`), {
-              completed: e.target.checked
+              completed: e.target.checked,
+              timestamp: e.target.checked ? Date.now() : null
             });
           });
 
           taskList.appendChild(li);
         });
       });
+    }
+
+    // Add new task
+    addBtn.addEventListener("click", () => {
+      const text = document.getElementById("newTaskText").value.trim();
+      const priority = document.getElementById("newTaskPriority").value;
+      const estTime = parseInt(document.getElementById("estTime").value);
+
+      if (!text) return alert("Enter a task name");
+
+      push(ref(db, `tasks/${user.uid}`), {
+        text,
+        priority,
+        timeRequired: isNaN(estTime) ? 0 : estTime,
+        deadline: "",
+        completed: false,
+        timestamp: null
+      });
+
+      document.getElementById("newTaskText").value = "";
+      document.getElementById("estTime").value = "";
     });
 
-    // Logout logic
-    const logoutBtn = document.getElementById("logoutBtn");
+    // Stopwatch logic
+    startBtn.addEventListener("click", () => {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+        startBtn.innerText = "Start Timer";
+      } else {
+        startBtn.innerText = "Stop Timer";
+        timer = setInterval(() => {
+          timeSpent++;
+          timerDisplay.innerText = `Time Spent: ${timeSpent} mins`;
+        }, 60000); // every minute
+      }
+    });
+
+    // Logout
     logoutBtn.addEventListener("click", () => {
       signOut(auth).then(() => {
-        window.location.href = "landing.html";
+        location.href = "landing.html";
       });
     });
   </script>

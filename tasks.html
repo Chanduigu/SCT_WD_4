@@ -118,7 +118,8 @@
                 timeRequired: isNaN(newTime) ? 0 : newTime,
                 deadline: newDeadline,
                 completed: completed,
-                timestamp: completed ? Date.now() : null
+                timestamp: completed ? Date.now() : null,
+                actualTimeSpent: completed ? timeSpent : 0
               });
             }
           });
@@ -128,11 +129,12 @@
             remove(ref(db, `tasks/${user.uid}/${key}`));
           });
 
-          // Toggle complete checkbox
+          // Toggle complete
           li.querySelector(".complete-checkbox").addEventListener("change", (e) => {
             update(ref(db, `tasks/${user.uid}/${key}`), {
               completed: e.target.checked,
-              timestamp: e.target.checked ? Date.now() : null
+              timestamp: e.target.checked ? Date.now() : null,
+              actualTimeSpent: e.target.checked ? timeSpent : 0
             });
           });
 
@@ -155,11 +157,14 @@
         timeRequired: isNaN(estTime) ? 0 : estTime,
         deadline: "",
         completed: false,
+        actualTimeSpent: 0,
         timestamp: null
       });
 
       document.getElementById("newTaskText").value = "";
       document.getElementById("estTime").value = "";
+      timeSpent = 0;
+      timerDisplay.innerText = "Time Spent: 0 mins";
     });
 
     // Stopwatch logic
@@ -173,7 +178,7 @@
         timer = setInterval(() => {
           timeSpent++;
           timerDisplay.innerText = `Time Spent: ${timeSpent} mins`;
-        }, 60000); // every minute
+        }, 60000); // every 1 minute
       }
     });
 

@@ -7,18 +7,28 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Glowing Background -->
   <div class="background"></div>
+
+  <!-- Login Container -->
   <div class="todo-container login-container">
     <h1 class="title">Welcome to Dharana</h1>
     <p class="subtitle">Your all-in-one glowing productivity companion 🌟</p>
 
-    <button id="loginBtn" class="google-btn">Login with Google</button>
+    <button id="loginBtn" class="button button-blue">Login with Google</button>
   </div>
 
+  <!-- Firebase Auth Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getAuth,
+      signInWithPopup,
+      GoogleAuthProvider,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+    // Your Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDfuOrLVQBsatKDAk1jru5Ok0rH42RsHqI",
       authDomain: "to-do-c2c21.firebaseapp.com",
@@ -29,12 +39,13 @@
       appId: "1:948561635865:web:d563fda0f4c297212d5888"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
+    // Login Button
     const loginBtn = document.getElementById("loginBtn");
-
     loginBtn.addEventListener("click", () => {
       signInWithPopup(auth, provider)
         .then(() => {
@@ -45,6 +56,7 @@
         });
     });
 
+    // Auto Redirect if Already Logged In
     onAuthStateChanged(auth, (user) => {
       if (user) {
         window.location.href = "dashboard.html";

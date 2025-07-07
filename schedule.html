@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Schedule – Dharana</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="background"></div>
@@ -85,7 +85,6 @@
       const tag = document.getElementById('tagInput').value;
       const rec = document.getElementById('recInput').value;
       if (!act || !st || !et) return alert("Please fill in all required fields.");
-
       push(ref(db, `schedule/${user.uid}`), { act, st, et, tag, rec });
       ['actInput', 'startInput', 'endInput'].forEach(id => document.getElementById(id).value = '');
     };
@@ -97,18 +96,50 @@
         snap.forEach(c => {
           const i = c.val();
           const k = c.key;
+
           const li = document.createElement('li');
           li.className = "task-item";
           li.innerHTML = `
-            <div style="flex:1">
+            <div style="flex: 1;">
               <strong style="color: ${i.tag === 'Work' ? '#ff9900' : i.tag === 'Health' ? '#33cc33' : '#66ccff'}">${i.act}</strong>
               <p>${i.st} – ${i.et} <em>(${i.rec})</em></p>
             </div>
-            <button class="delete-btn">Remove</button>
+            <div>
+              <button class="save-btn reminder-btn">Set Reminder</button>
+              <button class="delete-btn">Remove</button>
+            </div>
           `;
+
+          // Delete task
           li.querySelector('.delete-btn').onclick = () => {
             remove(ref(db, `schedule/${user.uid}/${k}`));
           };
+
+          // Set reminder
+          li.querySelector('.reminder-btn').onclick = () => {
+            const minutesBefore = prompt("Remind how many minutes before start time?", "5");
+            if (!minutesBefore) return;
+
+            const now = new Date();
+            const [h, m] = i.st.split(":").map(Number);
+            const eventTime = new Date();
+            eventTime.setHours(h, m, 0, 0);
+
+            const reminderTime = new Date(eventTime.getTime() - parseInt(minutesBefore) * 60000);
+            const delay = reminderTime - now;
+
+            if (delay <= 0) {
+              alert("Reminder time already passed!");
+              return;
+            }
+
+            alert(`Reminder set for "${i.act}" in ${Math.round(delay / 60000)} minute(s).`);
+
+            setTimeout(() => {
+              alert(`⏰ Reminder: "${i.act}" starts at ${i.st}`);
+            }, delay);
+          };
+
           sList.appendChild(li);
         });
       });

@@ -1,23 +1,25 @@
-/* === General Reset & Body === */
+/* === Global Reset === */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Segoe UI', sans-serif;
 }
+
+/* === Body (Light Mode) === */
 body {
-  background: #000;
-  color: #fff;
+  background: #f4faff;
+  color: #111;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* === Background Animation === */
+/* === Background Blur Glow (subtle for light mode) === */
 .background {
   position: fixed;
   width: 100%;
   height: 100%;
-  background: linear-gradient(130deg, #1a1a1a, #000);
+  background: linear-gradient(145deg, #f0f9ff, #ffffff);
   z-index: -2;
 }
 .background::before,
@@ -26,58 +28,89 @@ body {
   position: absolute;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at center, rgba(0,204,255,0.3), transparent 70%), radial-gradient(circle at center, rgba(255,0,204,0.3), transparent 70%);
-  animation: float 15s linear infinite;
+  background: radial-gradient(circle at center, rgba(0, 140, 255, 0.1), transparent 70%), radial-gradient(circle at center, rgba(255, 0, 204, 0.1), transparent 70%);
+  animation: float 20s linear infinite;
   z-index: -1;
 }
-.background::after { animation-delay: 5s; }
 @keyframes float {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* === Container Styles (cards, modals) === */
+/* === Glass Containers === */
 .container, .todo-container, .profile-container, .settings-container, .login-container {
-  max-width: 500px;
-  margin: 60px auto;
+  max-width: 600px;
+  margin: 100px auto;
   padding: 30px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(15px);
-  box-shadow: 0 0 20px rgba(0,255,255,0.1);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.05);
   text-align: center;
 }
 
-/* === Titles & Subtitles === */
+/* === Titles === */
 .title {
-  font-size: 2.2rem;
-  font-weight: bold;
-  color: #fff;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #004680;
   margin-bottom: 10px;
-  text-shadow: 0 0 10px #00f0ff;
+  text-shadow: 0 0 6px rgba(0, 100, 255, 0.2);
 }
 .subtitle {
   font-size: 1rem;
-  color: #ccc;
+  color: #333;
   margin-bottom: 20px;
 }
 
-/* === Navbar Links === */
-.nav-links, .profile-nav {
-  margin-top: 20px;
+/* === Top Navbar === */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
-.nav-links a, .profile-nav a {
-  color: #00e0ff;
-  margin: 0 12px;
-  text-decoration: none;
+.nav-brand {
+  font-size: 1.6rem;
   font-weight: bold;
-  transition: 0.3s;
+  color: #007acc;
+  text-shadow: 0 0 6px rgba(0, 122, 204, 0.2);
 }
-.nav-links a:hover, .profile-nav a:hover {
+.nav-items {
+  display: flex;
+  gap: 10px;
+}
+.nav-items a, .logout-btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: 0.3s ease;
   color: #fff;
 }
 
-/* === Buttons (Google, Save/Delete) === */
+/* === Navbar Colors === */
+.nav-items a[href*="dashboard"] { background-color: #00bcd4; }
+.nav-items a[href*="profile"]   { background-color: #ff69b4; }
+.nav-items a[href*="progress"]  { background-color: #4caf50; }
+.nav-items a[href*="settings"]  { background-color: #ff9800; }
+.logout-btn                    { background-color: #f44336; cursor: pointer; }
+
+.nav-items a:hover, .logout-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* === Button Styles === */
 .google-btn, .save-btn, .delete-btn, .btn {
   padding: 12px 20px;
   border: none;
@@ -94,28 +127,25 @@ body {
 .delete-btn { background: #ff4d4d; }
 .delete-btn:hover { background: #e60000; }
 
-/* === Input Group Styling === */
+/* === Input Groups === */
 .input-group {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-.input-group input[type="text"],
-.input-group input[type="number"],
-.input-group input[type="time"],
-.input-group input[type="datetime-local"],
+.input-group input,
 .input-group select {
   flex: 1;
   padding: 10px;
   border-radius: 10px;
   border: none;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  background: rgba(0, 0, 0, 0.05);
+  color: #111;
   outline: none;
 }
 
-/* === Task/Schedule List Styling === */
+/* === Task List === */
 .task-list {
   list-style: none;
   margin-top: 10px;
@@ -125,34 +155,21 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.03);
   padding: 10px 14px;
   border-radius: 12px;
   margin-bottom: 10px;
-  box-shadow: 0 0 8px rgba(0,255,255,0.1);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
 }
-.task-item span,
-.task-item div {
-  flex: 1;
-}
-.task-item input[type="text"] {
-  flex: 2;
-  margin-right: 10px;
-  padding: 6px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-}
-.task-item select,
+.task-item input[type="text"],
 .task-item input[type="number"],
-.task-item input[type="datetime-local"] {
+.task-item input[type="datetime-local"],
+.task-item select {
   padding: 6px;
-  margin-right: 6px;
   border-radius: 8px;
   border: none;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  background: #f0f0f0;
+  color: #111;
 }
 .task-item input[type="checkbox"] {
   margin-right: 10px;
@@ -164,12 +181,13 @@ body {
   font-weight: bold;
   padding: 5px 10px;
   border-radius: 8px;
+  color: #fff;
 }
 .priority-tag.High { background-color: #ff4d4d; }
 .priority-tag.Medium { background-color: #ffaa00; }
 .priority-tag.Low { background-color: #3dc0ff; }
 
-/* === Schedule Blocks (on dashboard) === */
+/* === Schedule Blocks === */
 .schedule {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
@@ -178,50 +196,43 @@ body {
   padding: 10px;
 }
 .schedule-block {
-  background: rgba(255,255,255,0.07);
+  background: #fff;
   border-radius: 16px;
   padding: 20px;
   text-align: center;
   backdrop-filter: blur(12px);
-  box-shadow: 0 0 15px rgba(0,255,255,0.15);
-  animation: glowPulse 6s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .schedule-block:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 25px rgba(0,255,255,0.25);
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
 }
 .schedule-block h3 {
   font-size: 1.2rem;
-  color: #00f0ff;
-  text-shadow: 0 0 5px #00f0ff;
+  color: #007acc;
 }
 .schedule-block p {
-  color: #fff;
+  color: #333;
   opacity: 0.9;
 }
-@keyframes glowPulse {
-  0%,100% { box-shadow: 0 0 15px rgba(0,255,255,0.1); }
-  50% { box-shadow: 0 0 25px rgba(0,255,255,0.25); }
-}
 
-/* === Progress Charts & Streak Text === */
+/* === Charts & Streak === */
 canvas {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.8);
   border-radius: 15px;
   padding: 20px;
   margin-top: 10px;
-  box-shadow: 0 0 20px rgba(0,255,255,0.1);
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
 }
 .streak {
   margin-top: 20px;
   font-size: 1.2rem;
-  color: #00ffff;
-  text-shadow: 0 0 8px #00ffff;
+  color: #007acc;
   font-weight: bold;
 }
 
-/* === Profile Page Styles === */
+/* === Profile === */
 .profile-container .profile-info {
   text-align: left;
 }
@@ -235,7 +246,7 @@ canvas {
   gap: 12px;
 }
 
-/* === Settings Page Styles === */
+/* === Settings === */
 .settings-container form {
   display: grid;
   gap: 12px;
@@ -252,8 +263,8 @@ canvas {
   padding: 10px;
   border-radius: 8px;
   border: none;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  background: rgba(0, 0, 0, 0.05);
+  color: #111;
   outline: none;
 }
 .settings-container .form-section {
@@ -261,26 +272,7 @@ canvas {
 }
 .settings-container .form-section h3 {
   margin-bottom: 8px;
-  color: #00f0ff;
-}
-
-/* === Light/Dark Mode === */
-body.light-mode {
-  background: #f5f5f5;
-  color: #000;
-}
-body.light-mode .container,
-body.light-mode .todo-container,
-body.light-mode .profile-container,
-body.light-mode .settings-container {
-  background: rgba(255,255,255,0.9);
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
-}
-body.light-mode .background { display: none; }
-body.light-mode .title,
-body.light-mode .subtitle {
-  color: #000;
-  text-shadow: none;
+  color: #007acc;
 }
 
 /* === Mobile Responsive === */
@@ -288,74 +280,8 @@ body.light-mode .subtitle {
   .schedule {
     grid-template-columns: 1fr;
   }
-}
-/* === Top Navbar === */
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  padding: 12px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 1000;
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
-}
-
-.nav-brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #00f0ff;
-  text-shadow: 0 0 6px #00f0ff;
-}
-
-/* === Top Navbar Buttons Right === */
-.nav-items {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.nav-items a,
-.logout-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  text-decoration: none;
-  transition: 0.3s ease;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
-}
-
-/* Unique Button Colors */
-.nav-items a[href*="dashboard"] {
-  background-color: #00f0ff;
-  color: #000;
-}
-.nav-items a[href*="profile"] {
-  background-color: #ff66cc;
-  color: #000;
-}
-.nav-items a[href*="progress"] {
-  background-color: #66ff66;
-  color: #000;
-}
-.nav-items a[href*="settings"] {
-  background-color: #ffaa00;
-  color: #000;
-}
-.logout-btn {
-  background-color: #ff4d4d;
-  color: #fff;
-  cursor: pointer;
-}
-
-/* Hover effects */
-.nav-items a:hover,
-.logout-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+  .nav-items {
+    flex-direction: column;
+    gap: 8px;
+  }
 }

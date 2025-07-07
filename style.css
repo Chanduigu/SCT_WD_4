@@ -289,3 +289,73 @@ body.light-mode .subtitle {
     grid-template-columns: 1fr;
   }
 }
+/* === Top Navbar === */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
+}
+
+.nav-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #00f0ff;
+  text-shadow: 0 0 6px #00f0ff;
+}
+
+/* === Top Navbar Buttons Right === */
+.nav-items {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.nav-items a,
+.logout-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: 0.3s ease;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+/* Unique Button Colors */
+.nav-items a[href*="dashboard"] {
+  background-color: #00f0ff;
+  color: #000;
+}
+.nav-items a[href*="profile"] {
+  background-color: #ff66cc;
+  color: #000;
+}
+.nav-items a[href*="progress"] {
+  background-color: #66ff66;
+  color: #000;
+}
+.nav-items a[href*="settings"] {
+  background-color: #ffaa00;
+  color: #000;
+}
+.logout-btn {
+  background-color: #ff4d4d;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Hover effects */
+.nav-items a:hover,
+.logout-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+}

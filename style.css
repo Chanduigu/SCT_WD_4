@@ -28,7 +28,8 @@ body {
   position: absolute;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at center, rgba(0, 140, 255, 0.1), transparent 70%), radial-gradient(circle at center, rgba(255, 0, 204, 0.1), transparent 70%);
+  background: radial-gradient(circle at center, rgba(0, 140, 255, 0.1), transparent 70%),
+              radial-gradient(circle at center, rgba(255, 0, 204, 0.1), transparent 70%);
   animation: float 20s linear infinite;
   z-index: -1;
 }
@@ -110,22 +111,30 @@ body {
   opacity: 0.9;
 }
 
-/* === Button Styles === */
-.google-btn, .save-btn, .delete-btn, .btn {
+/* === Reusable Button Styles === */
+.button {
   padding: 12px 20px;
   border: none;
-  color: #fff;
+  border-radius: 10px;
   font-weight: bold;
-  border-radius: 12px;
+  text-decoration: none;
+  transition: 0.3s ease;
+  display: inline-block;
   cursor: pointer;
-  transition: background 0.3s ease;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 }
-.google-btn { background: #4285F4; }
-.google-btn:hover { background: #3367D6; }
-.save-btn { background: #00c9ff; }
-.save-btn:hover { background: #009bbf; }
-.delete-btn { background: #ff4d4d; }
-.delete-btn:hover { background: #e60000; }
+.button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* === Button Color Variants === */
+.button-blue    { background-color: #00bcd4; color: #fff; }
+.button-pink    { background-color: #ff69b4; color: #fff; }
+.button-green   { background-color: #4caf50; color: #fff; }
+.button-orange  { background-color: #ff9800; color: #fff; }
+.button-red     { background-color: #f44336; color: #fff; }
+.button-purple  { background-color: #a020f0; color: #fff; }
 
 /* === Input Groups === */
 .input-group {

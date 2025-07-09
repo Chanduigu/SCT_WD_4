@@ -5,7 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dharana - Welcome</title>
   <link rel="stylesheet" href="style.css" />
-</head>
+</head><script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+  }
+</script>
+
 <body>
   <div class="background"></div>
 

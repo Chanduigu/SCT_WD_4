@@ -6,7 +6,12 @@
   <title>Dharana - My Progress</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
+</head><script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+  }
+</script>
+
 <body>
   <div class="background"></div>
 

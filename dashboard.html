@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Theme Loader -->
+
   <script>
     if (localStorage.getItem("theme") === "dark") {
       document.body.classList.add("dark");
@@ -16,7 +16,7 @@
 
   <div class="background"></div>
 
-  <!-- Top Navbar -->
+
   <nav class="navbar">
     <div class="nav-brand">Dharana</div>
     <div class="nav-items right-corner">
@@ -28,7 +28,7 @@
     </div>
   </nav>
 
-  <!-- Welcome Content -->
+ 
   <div class="todo-container" style="margin-top: 120px;">
     <h1 class="title">Welcome to Dharana</h1>
     <p class="subtitle">
@@ -41,7 +41,7 @@
     </div>
   </div>
 
-  <!-- Firebase Auth Logic -->
+ 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -62,7 +62,7 @@
     // Redirect if not authenticated
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        window.location.href = "landing.html";
+        window.location.href = "index.html";
       }
     });
 
@@ -70,7 +70,7 @@
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", () => {
       signOut(auth).then(() => {
-        window.location.href = "landing.html";
+        window.location.href = "index.html";
       });
     });
   </script>
